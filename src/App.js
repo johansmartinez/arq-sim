@@ -1,23 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import { Form } from "./components/Form";
+import { Sim } from "./components/Sim";
 
 function App() {
+  const [view, setView] = useState("form");
+  const [juegos, setJuegos] = useState(1);
+
+  const simular=(event)=>{
+    if(event) event.preventDefault();
+    setView("sim");
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container mt-4">
+      <h2>Simulación de Arquería</h2>
+      { view ==="form" && <Form juegos={juegos} cambiarJuegos={setJuegos} simular={simular}/>}
+      { view ==="sim" && <Sim juegos={juegos}/>}
     </div>
   );
 }
