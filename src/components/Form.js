@@ -7,7 +7,9 @@ function Form( {juegos, cambiarJuegos, simular}) {
                 <label className="form-label">Número de Juegos</label>
                 <input type="number" min={1} value={juegos} onChange={e=>cambiarJuegos(e.target.value)} className="form-control" />
             </div>
-            <button type="button" disabled={juegos<=0} className="btn btn-primary" onClick={e=>simular(e)}>Simular</button>
+            <div className="row justify-content-center">
+                <button type="button" disabled={juegos<=0} className="btn btn-primary col-md-6" onClick={e=>simular(e)}>Simular</button>
+            </div>
         </form>
     );
 }

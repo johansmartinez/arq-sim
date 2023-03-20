@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { JuegoInfo } from "./JuegoInfo";
+import { Modal } from "./Modal";
 
 function Sim({ juegos }) {
 
     const [simulando, setSimulando] = useState(false);
+    const [finalizado, setFinalizado] = useState(false);
     const [juegosInfo, setJuegosInfo] = useState([]);
+    
+    const [modal, setModal] = useState("");
 
     const JUG_X_EQUIPO = 5;
     const MED_RES = 35;
@@ -37,6 +41,9 @@ function Sim({ juegos }) {
         return equipo;
     };
 
+    const [t1, setT1] = useState(crearEquipo("T1"));
+    const [t2, setT2] = useState(crearEquipo("T2"));
+
     function selecccionarGenero() {
         let g=["M", "H"];
         return g[Math.floor(Math.random() * g.length)];
@@ -52,10 +59,6 @@ function Sim({ juegos }) {
         var z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
         return Math.abs(media + z * desviacionEstandar);
     }
-
-    const t1=crearEquipo("T1");
-    const t2=crearEquipo("T2");
-
 
     //--- CEN- INT - EX- ERR
     const MUJ_DIANAS=[0.3, 0.58, 0.85, 1];
@@ -167,10 +170,11 @@ function Sim({ juegos }) {
     }
     
     const comenzar=async ()=>{
+        setSimulando(true);
         let tempJI=[];
         for (let i = 0; i < juegos; i++) {
-            let temp1=[...t1];
-            let temp2=[...t2];
+            let temp1= t1.map(x=>x);
+            let temp2= t2.map(x=>x);
             let puntosE1=0;
             let puntosE2=0;
             let msInfo={
@@ -207,7 +211,7 @@ function Sim({ juegos }) {
             }
             
             
-            tempJI.push({
+            await tempJI.push({
                 max_suerte:msInfo,
                 max_exp:maxExpJuego(temp1, temp2),
                 eq1_puntos: puntosE1,
@@ -221,20 +225,59 @@ function Sim({ juegos }) {
                 suerte:0,
             }
         }
+        setFinalizado(true)
         setJuegosInfo(tempJI);
     }
 
-    
+    const cerrarModal=()=>{
+        setModal("");
+    }
+
+    const puntosJugadorXJuego=(nombre)=>{
+        let temp=[];
+        for (let i = 0; i < juegosInfo.length; i++) {
+            const juego=juegosInfo[i];
+            let puntos=0;
+            let temp1=juego.info_puntos.pje1.filter(e=>e.jugador===nombre);
+            for (let i = 0; i < temp1.length; i++) {
+                puntos+= temp1[i].puntos;
+            }
+            let temp2=juego.info_puntos.pje2.filter(e=>e.jugador===nombre);
+            for (let i = 0; i < temp2.length; i++) {
+                puntos+= temp2[i].puntos;
+            }
+            temp.push({juego:(i+1), puntos: puntos})
+        }
+        return temp;
+    }
 
     return (
         <div className="mt-4">
-            <label>Número de juegos: {juegos}</label><br/>
-            <button onClick={comenzar}>Iniciar</button>
+            {!simulando&&<div className="text-center">
+                <h3>Número de juegos: {juegos}</h3><br/>
+                <button className="btn btn-primary btn-lg" onClick={comenzar}>Iniciar</button>
+                
+            </div>}
+            {!!finalizado && <div className="row">
+                    <div className="col card mx-1">
+                        <h5 className="text-center card-header">Equipo 1:</h5>
+                        <div className="card-body">
+                            {t1.map(j=>(<p key={`E1-${j.nombre}`} className="d-flex justify-content-between"> <label> {j.nombre} | {(j.genero==="H")?"Hombre":"Mujer"}</label> <button className="btn btn-info btn-sm"  onClick={e=>setModal(j.nombre)}>Detalles</button></p>))}
+                        </div>
+                    </div>
+                    <div className="col card mx-1">
+                        <h5 className="text-center card-header">Equipo 2:</h5>
+                        <div className="card-body">
+                            {t2.map(j=>(<p key={`E2-${j.nombre}`} className="d-flex justify-content-between"> <label> {j.nombre} | {(j.genero==="H")?"Hombre":"Mujer"}</label> <button className="btn btn-info btn-sm" onClick={e=>setModal(j.nombre)}>Detalles</button></p>))}
+                        </div>
+                    </div>
+                </div>}
             {
-                juegosInfo.map( (j, i)=>(
+                !!finalizado&&juegosInfo.map( (j, i)=>(
                     <JuegoInfo key={`jueinfo-${i}`} info={j} index={i}/>
                 ))
             }
+            {(modal!=="")&&<Modal jugador={modal} getInfo={puntosJugadorXJuego} cerrar={cerrarModal}/>}
         </div>
     );
 }
