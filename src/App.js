@@ -4,7 +4,7 @@ import { Sim } from "./components/Sim";
 
 function App() {
   const [view, setView] = useState("form");
-  const [juegos, setJuegos] = useState(1);
+  const [juegos, setJuegos] = useState(20000);
 
   const simular=(event)=>{
     if(event) event.preventDefault();
